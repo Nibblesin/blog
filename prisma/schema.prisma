@@ -26,9 +26,12 @@ model Post {
   content   String?
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String   @db.ObjectId
+  category  Category @relation(fields: [categoryName], references: [name])
+  categoryName String
 }
 
-// model Category{
-//   id String @id @default(auto()) @map("_id") @db.ObjectId
-//   name String @unique
-// }
+model Category{
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String @unique
+  posts Post[]
+}
