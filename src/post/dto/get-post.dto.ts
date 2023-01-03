@@ -8,6 +8,7 @@ export class GetPostDto implements Post {
   authorId: string;
   createdAt: Date;
   updatedAt: Date;
+  categoryId: string[];
 }
 
 export interface PaginatedDto<T> {

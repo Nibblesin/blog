@@ -1,27 +1,103 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Post, Prisma } from '@prisma/client';
+import { Get, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetPostDto, PaginatedDto } from './dto/get-post.dto';
+import { Post, Prisma, Category } from '@prisma/client';
 
 @Injectable()
 export class PostService {
+  //make sure only service can interact with posts through methods
   private posts: Post[] = [];
 
   constructor(private readonly prisma: PrismaService) {}
 
-  insertPost(post: CreatePostDto): Promise<GetPostDto> {
+  async insertPost(post: CreatePostDto): Promise<GetPostDto> {
     return this.prisma.post.create({
       data: post,
     });
   }
 
-  async getPosts(page: number, per: number): Promise<PaginatedDto<GetPostDto>> {
-    const items = await this.prisma.post.findMany({
-      skip: (page - 1) * per,
-      take: per,
-    });
-    const count = await this.prisma.post.count();
+  async getPosts(
+    page: number,
+    per: number,
+    sel_category: string[] | undefined,
+    sel_author: string | undefined,
+  ): Promise<PaginatedDto<GetPostDto>> {
+    //let is variable
+    let items;
+    let count;
+
+    if (sel_category && sel_author) {
+      // find items by categories and author
+      items = await this.prisma.post.findMany({
+        where: {
+          categoryId: {
+            hasSome: sel_category,
+          },
+          authorId: sel_author,
+        },
+        skip: (page - 1) * per,
+        take: per,
+      });
+    } else if (sel_category) {
+      // find items by categories
+      items = await this.prisma.post.findMany({
+        where: {
+          categoryId: {
+            hasSome: sel_category,
+          },
+        },
+        skip: (page - 1) * per,
+        take: per,
+      });
+    } else if (sel_author) {
+      // find items by author
+      items = await this.prisma.post.findMany({
+        where: {
+          authorId: sel_author,
+        },
+        skip: (page - 1) * per,
+        take: per,
+      });
+    } else {
+      // returns all items
+      items = await this.prisma.post.findMany({
+        skip: (page - 1) * per,
+        take: per,
+      });
+    }
+
+    if (sel_category && sel_author) {
+      // find items by categories and author
+      count = await this.prisma.post.count({
+        where: {
+          categoryId: {
+            hasSome: sel_category,
+          },
+          authorId: sel_author,
+        },
+      });
+    } else if (sel_category) {
+      // find count by categories
+      count = await this.prisma.post.count({
+        where: {
+          categoryId: {
+            hasSome: sel_category,
+          },
+        },
+      });
+    } else if (sel_author) {
+      // find count by author
+      count = await this.prisma.post.count({
+        where: {
+          authorId: sel_author,
+        },
+      });
+    } else {
+      // returns all count
+      count = await this.prisma.post.count();
+    }
+
     const metadata = {
       total: count,
       totalPage: Math.ceil(count / per),
@@ -30,47 +106,34 @@ export class PostService {
     };
     return {
       items,
+      // items: items,
       metadata,
+      // metadata: metadata,
     };
   }
 
-  async getSingerpost(
-    postId: Prisma.PostWhereUniqueInput,
-  ): Promise<GetPostDto> {
-    try {
-      const post = await this.prisma.post.findUnique({
-        where: postId,
-      });
-      return post;
-    } catch (error) {
-      throw new NotFoundException('Could not find post.');
-    }
+  getSinglePost(postId: string): Promise<GetPostDto> {
+    return this.prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
   }
 
-  async updatePost(postId: string, post: CreatePostDto): Promise<GetPostDto> {
-    try {
-      const updatedPost = await this.prisma.post.update({
-        where: {
-          id: postId,
-        },
-        data: post,
-      });
-      return updatedPost;
-    } catch (error) {
-      throw new NotFoundException('Could not find post.');
-    }
+  updatePost(postId: string, post: CreatePostDto): Promise<GetPostDto> {
+    return this.prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: post,
+    });
   }
 
-  async deletePost(postId: string): Promise<GetPostDto> {
-    try {
-      const deletedPost = await this.prisma.post.delete({
-        where: {
-          id: postId,
-        },
-      });
-      return deletedPost;
-    } catch (error) {
-      throw new NotFoundException('Could not find post.');
-    }
+  deletePost(postId: string): Promise<GetPostDto> {
+    return this.prisma.post.delete({
+      where: {
+        id: postId,
+      },
+    });
   }
 }

@@ -8,4 +8,7 @@ export class CreatePostDto {
 
   @IsString()
   authorId: string;
+
+  @IsString()
+  categoryId: string[];
 }
