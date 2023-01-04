@@ -127,6 +127,18 @@ export class PostService {
     });
   }
 
+  // return authorId
+  getAuthorId(postId: string): Promise<{ authorId: string }> {
+    return this.prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        authorId: true,
+      },
+    });
+  }
+
   updatePost(postId: string, post: CreatePostDto): Promise<GetPostDto> {
     return this.prisma.post.update({
       where: {

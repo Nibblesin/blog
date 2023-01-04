@@ -14,7 +14,12 @@ import { PostService } from './post.service';
 import { GetPostDto, PaginatedDto } from './dto/get-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+
+interface RequestWithUser extends Request {
+  user: {
+    userId: string;
+  };
+}
 
 @Controller('post')
 export class PostController {
@@ -22,7 +27,7 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  addPost(@Body() post: CreatePostDto, @Req() req) {
+  addPost(@Body() post: CreatePostDto, @Req() req: RequestWithUser) {
     console.log(req.user);
     return this.postsService.insertPost(post, req.user.userId);
   }
@@ -47,12 +52,20 @@ export class PostController {
     return this.postsService.getSinglePost(prodId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  updatePost(
+  async updatePost(
     @Param('id') prodId: string,
     @Body() post: GetPostDto,
+    @Req() req: RequestWithUser,
   ): Promise<GetPostDto> {
-    return this.postsService.updatePost(prodId, post);
+    // if user is admin or author of post then update
+    const author = await this.postsService.getAuthorId(prodId);
+    if (req.user.userId === author.authorId || req.user.userId === 'admin') {
+      return this.postsService.updatePost(prodId, post);
+    } else {
+      throw new Error('Unauthorized');
+    }
   }
 
   @Delete(':id')
