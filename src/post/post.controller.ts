@@ -7,19 +7,24 @@ import {
   Patch,
   Delete,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { GetPostDto, PaginatedDto } from './dto/get-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postsService: PostService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  //@Query('category') category: string,
-  addPost(@Body() post: CreatePostDto) {
-    return this.postsService.insertPost(post);
+  addPost(@Body() post: CreatePostDto, @Req() req) {
+    console.log(req.user);
+    return this.postsService.insertPost(post, req.user.userId);
   }
 
   @Get()

@@ -11,9 +11,16 @@ export class PostService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async insertPost(post: CreatePostDto): Promise<GetPostDto> {
+  async insertPost(post: CreatePostDto, user: string): Promise<GetPostDto> {
     return this.prisma.post.create({
-      data: post,
+      data: {
+        ...post,
+        author: {
+          connect: {
+            id: user,
+          },
+        },
+      },
     });
   }
 

@@ -17,6 +17,10 @@ export class UserService {
     });
   }
 
+  async findOne(username: string): Promise<User | undefined> {
+    return this.users.find((user) => user.name === username);
+  }
+
   async getUsers(page: number, per: number): Promise<PaginatedDto<GetUserDto>> {
     const items = await this.prisma.user.findMany({
       skip: (page - 1) * per,

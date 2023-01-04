@@ -7,8 +7,5 @@ export class CreatePostDto {
   content: string;
 
   @IsString()
-  authorId: string;
-
-  @IsString()
   categoryId: string[];
 }

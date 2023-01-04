@@ -4,7 +4,9 @@ export class GetUserDto implements User {
   email: string;
   id: string;
   name: string;
-  //   post: any;
+  username: string;
+  password: string;
+  // post: any;
 }
 
 export interface PaginatedDto<T> {
