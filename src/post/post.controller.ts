@@ -14,7 +14,7 @@ import { PostService } from './post.service';
 import { GetPostDto, PaginatedDto } from './dto/get-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { ApiTags } from '@nestjs/swagger';
 
 interface RequestWithUser extends Request {
@@ -39,6 +39,22 @@ export class PostController {
 
   @Get()
   @ApiOkResponse({ description: 'Get all posts.' })
+  @ApiParam({
+    name: 'page',
+    required: false,
+  })
+  @ApiParam({
+    name: 'per',
+    required: false,
+  })
+  @ApiParam({
+    name: 'category',
+    required: false,
+  })
+  @ApiParam({
+    name: 'author',
+    required: false,
+  })
   getAllPosts(
     @Query('page') page: string = '1',
     @Query('per') per: string = '10',

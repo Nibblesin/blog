@@ -8,7 +8,12 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
@@ -28,6 +33,14 @@ export class UserController {
 
   @Get()
   @ApiOkResponse({ description: 'Get all users.' })
+  @ApiParam({
+    name: 'page',
+    required: false,
+  })
+  @ApiParam({
+    name: 'per',
+    required: false,
+  })
   getAllUsers(@Query('page') page: string, @Query('per') per: string) {
     return this.userService.getUsers(parseInt(page), parseInt(per));
   }
